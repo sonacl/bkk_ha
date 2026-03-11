@@ -14,6 +14,14 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORMS = [Platform.SENSOR]
 URL_BASE = "/bkk_ha"
 
+# Support for both old and new Home Assistant versions
+try:
+    from homeassistant.components.http import StaticPathConfig
+
+    STATIC_PATH_AVAILABLE = True
+except ImportError:
+    STATIC_PATH_AVAILABLE = False
+
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up BKK Stop from a config entry."""
@@ -21,19 +29,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Register the Lovelace card as a static path
     card_path = os.path.join(os.path.dirname(__file__), "bkk-stop-card.js")
     if os.path.exists(card_path):
-        # Support both old and new HA API for static paths
-        if hasattr(hass.http, "register_static_path"):
-            hass.http.register_static_path(f"{URL_BASE}/bkk-stop-card.js", card_path)
-        elif hasattr(hass.http, "async_register_static_paths"):
-            hass.async_create_task(
-                hass.http.async_register_static_paths(
-                    [
-                        hass.http.StaticPathConfig(
-                            f"{URL_BASE}/bkk-stop-card.js", card_path, True
-                        )
-                    ]
-                )
+        url_path = f"{URL_BASE}/bkk-stop-card.js"
+
+        if STATIC_PATH_AVAILABLE:
+            # New way (HA 2024.7+)
+            from homeassistant.components.http import StaticPathConfig
+
+            await hass.http.async_register_static_paths(
+                [StaticPathConfig(url_path, card_path, True)]
             )
+        else:
+            # Legacy way (pre HA 2024.7)
+            hass.http.register_static_path(url_path, card_path, True)
 
     api_key = entry.data[CONF_APIKEY]
     stops = entry.options.get(CONF_STOPS, [])
