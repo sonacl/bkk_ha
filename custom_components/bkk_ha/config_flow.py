@@ -59,7 +59,7 @@ class BKKStopConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> BKKOptionsFlowHandler:
         """Get the options flow for this handler."""
-        return BKKOptionsFlowHandler(config_entry)
+        return BKKOptionsFlowHandler()
 
 
 class BKKOptionsFlowHandler(config_entries.OptionsFlow):
