@@ -21,7 +21,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Register the Lovelace card as a static path
     card_path = os.path.join(os.path.dirname(__file__), "bkk-stop-card.js")
     if os.path.exists(card_path):
-        hass.http.register_static_path(f"{URL_BASE}/bkk-stop-card.js", card_path)
+        # Support both old and new HA API for static paths
+        if hasattr(hass.http, "register_static_path"):
+            hass.http.register_static_path(f"{URL_BASE}/bkk-stop-card.js", card_path)
+        elif hasattr(hass.http, "async_register_static_paths"):
+            hass.async_create_task(
+                hass.http.async_register_static_paths(
+                    [
+                        hass.http.StaticPathConfig(
+                            f"{URL_BASE}/bkk-stop-card.js", card_path, True
+                        )
+                    ]
+                )
+            )
 
     api_key = entry.data[CONF_APIKEY]
     stops = entry.options.get(CONF_STOPS, [])
