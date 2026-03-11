@@ -3,41 +3,59 @@
         "step": {
             "user": {
                 "title": "Budapest GO (BKK)",
-                "description": "Enter your BKK API Key to start.",
+                "description": "Enter your BKK API Key to get started.",
                 "data": {
                     "api_key": "BKK API Key"
+                },
+                "data_description": {
+                    "api_key": "Your API key from go.bkk.hu"
                 }
             }
         },
         "abort": {
-            "already_configured": "This API key is already configured."
+            "already_configured": "This integration is already configured."
         }
     },
     "options": {
         "step": {
             "init": {
-                "title": "Manage BKK Stops",
-                "description": "What would you like to do?"
+                "title": "Budapest GO",
+                "menu_options": {
+                    "add_stop": "Add a new stop",
+                    "manage_stops": "Remove an existing stop"
+                }
             },
             "add_stop": {
                 "title": "Add Stop",
+                "description": "Enter the BKK Stop ID. You can find it on the BKK website or app.",
                 "data": {
-                    "stop_id": "BKK Stop ID (e.g., BKK_F02283)",
-                    "name": "Custom Name (Optional)",
-                    "max_items": "Max items to display",
-                    "mins_after": "Minutes after now",
-                    "mins_before": "Minutes before now",
-                    "ignore_now": "Ignore immediate departures",
-                    "in_predicted": "Use real-time predictions",
-                    "wheelchair": "Show wheelchair access",
-                    "bikes": "Show bike access",
+                    "stop_id": "Stop ID",
+                    "name": "Display Name",
+                    "max_items": "Max departures to show",
+                    "mins_after": "Search window (minutes ahead)",
+                    "mins_before": "Search window (minutes behind)",
+                    "ignore_now": "Hide vehicles departing now (0 min)",
+                    "in_predicted": "Use real-time predicted times",
+                    "wheelchair": "Show wheelchair accessibility",
+                    "bikes": "Show bike allowance",
                     "colors": "Use route colors"
+                },
+                "data_description": {
+                    "stop_id": "e.g. BKK_F02283",
+                    "name": "Leave empty to use the stop's official name"
+                }
+            },
+            "no_stops": {
+                "title": "No Stops Configured",
+                "menu_options": {
+                    "add_stop": "Add a new stop"
                 }
             },
             "manage_stops": {
                 "title": "Remove Stop",
+                "description": "Select a stop to remove.",
                 "data": {
-                    "stop_to_remove": "Select stop to remove"
+                    "stop_to_remove": "Stop to remove"
                 }
             }
         }
