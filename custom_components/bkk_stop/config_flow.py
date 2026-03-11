@@ -28,7 +28,6 @@ class BKKStopConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None):
         """Initial setup: API Key."""
         if user_input is not None:
-            # We save the API key and initialize an empty list of stops
             return self.async_create_entry(
                 title="Budapest GO (BKK)",
                 data={CONF_APIKEY: user_input[CONF_APIKEY]},
@@ -53,10 +52,6 @@ class BKKStopConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class BKKOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle options for BKK Stop."""
 
-    def __init__(self, config_entry):
-        self.config_entry = config_entry
-        self.options = dict(config_entry.options)
-
     async def async_step_init(self, user_input=None):
         """Menu for adding or managing stops."""
         return self.async_show_menu(
@@ -67,11 +62,16 @@ class BKKOptionsFlowHandler(config_entries.OptionsFlow):
         """Step to add a new stop."""
         if user_input is not None:
             # Add new stop to the list
-            if CONF_STOPS not in self.options:
-                self.options[CONF_STOPS] = []
+            options = dict(self.config_entry.options)
+            if CONF_STOPS not in options:
+                options[CONF_STOPS] = []
 
-            self.options[CONF_STOPS].append(user_input)
-            return self.async_create_entry(title="", data=self.options)
+            # Create a copy of the list to ensure Home Assistant detects the change
+            new_stops = list(options[CONF_STOPS])
+            new_stops.append(user_input)
+            options[CONF_STOPS] = new_stops
+
+            return self.async_create_entry(title="", data=options)
 
         return self.async_show_form(
             step_id="add_stop",
@@ -92,18 +92,17 @@ class BKKOptionsFlowHandler(config_entries.OptionsFlow):
         )
 
     async def async_step_manage_stops(self, user_input=None):
-        """Select a stop to remove (simple management)."""
-        stops = self.options.get(CONF_STOPS, [])
+        """Select a stop to remove."""
+        options = dict(self.config_entry.options)
+        stops = options.get(CONF_STOPS, [])
         if not stops:
             return self.async_show_menu(step_id="no_stops", menu_options=["add_stop"])
 
         if user_input is not None:
             # Remove selected stop
             stop_to_remove = user_input["stop_to_remove"]
-            self.options[CONF_STOPS] = [
-                s for s in stops if s[CONF_STOPID] != stop_to_remove
-            ]
-            return self.async_create_entry(title="", data=self.options)
+            options[CONF_STOPS] = [s for s in stops if s[CONF_STOPID] != stop_to_remove]
+            return self.async_create_entry(title="", data=options)
 
         stop_options = {
             s[CONF_STOPID]: f"{s.get(CONF_NAME, s[CONF_STOPID])} ({s[CONF_STOPID]})"
