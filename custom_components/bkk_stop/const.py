@@ -1,0 +1,17 @@
+DOMAIN = "bkk_stop"
+CONF_APIKEY = "api_key"
+CONF_STOPS = "stops"
+CONF_STOPID = "stop_id"
+CONF_NAME = "name"
+CONF_MAX_ITEMS = "max_items"
+CONF_MINS_AFTER = "mins_after"
+CONF_MINS_BEFORE = "mins_before"
+CONF_WHEELCHAIR = "wheelchair"
+CONF_BIKES = "bikes"
+CONF_COLORS = "colors"
+CONF_IGNORE_NOW = "ignore_now"
+CONF_IN_PREDICTED = "in_predicted"
+
+DEFAULT_NAME = "Budapest GO"
+DEFAULT_SCAN_INTERVAL = 120
+CONF_ATTRIBUTION = "Data provided by go.bkk.hu"

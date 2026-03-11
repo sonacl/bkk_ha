@@ -1,0 +1,21 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Budapest GO (BKK)",
+                "data": {
+                    "api_key": "BKK API Key",
+                    "stop_id": "BKK Stop ID",
+                    "max_items": "Max items to display",
+                    "mins_after": "Minutes after now to search",
+                    "mins_before": "Minutes before now to search",
+                    "ignore_now": "Ignore vehicles departing now",
+                    "in_predicted": "Use predicted times",
+                    "wheelchair": "Show wheelchair accessibility",
+                    "bikes": "Show bike accessibility",
+                    "colors": "Use route colors"
+                }
+            }
+        }
+    }
+}
