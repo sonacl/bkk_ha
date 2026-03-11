@@ -7,7 +7,6 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
-import homeassistant.helpers.config_validation as cv
 
 from .const import (
     DOMAIN,
@@ -59,36 +58,37 @@ class BKKStopConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> BKKOptionsFlowHandler:
         """Get the options flow for this handler."""
+        # Do NOT pass config_entry here.
+        # In HA 2024.x+, config_entry is a read-only @property on OptionsFlow.
+        # Passing it causes: AttributeError: property 'config_entry' has no setter.
         return BKKOptionsFlowHandler()
 
 
 class BKKOptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle options for BKK Stop."""
+    """Handle options for BKK Stop.
 
-    # In modern HA, self.config_entry is automatically available.
-    # We do NOT use __init__ to avoid potential 500 errors if signature mismatches.
+    Do NOT define __init__ here.
+    self.config_entry is provided automatically by the base class as a @property.
+    """
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Menu for adding or managing stops."""
+        """Menu: add or manage stops."""
         return self.async_show_menu(
-            step_id="init", menu_options=["add_stop", "manage_stops"]
+            step_id="init",
+            menu_options=["add_stop", "manage_stops"],
         )
 
     async def async_step_add_stop(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Step to add a new stop."""
+        """Add a new stop."""
         if user_input is not None:
             options = dict(self.config_entry.options)
-            if CONF_STOPS not in options:
-                options[CONF_STOPS] = []
-
-            new_stops = list(options[CONF_STOPS])
-            new_stops.append(user_input)
-            options[CONF_STOPS] = new_stops
-
+            stops = list(options.get(CONF_STOPS, []))
+            stops.append(user_input)
+            options[CONF_STOPS] = stops
             return self.async_create_entry(title="", data=options)
 
         return self.async_show_form(
@@ -112,15 +112,19 @@ class BKKOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_manage_stops(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Select a stop to remove."""
+        """Remove an existing stop."""
         options = dict(self.config_entry.options)
         stops = options.get(CONF_STOPS, [])
+
         if not stops:
-            return self.async_show_menu(step_id="no_stops", menu_options=["add_stop"])
+            return self.async_show_menu(
+                step_id="no_stops",
+                menu_options=["add_stop"],
+            )
 
         if user_input is not None:
-            stop_to_remove = user_input["stop_to_remove"]
-            options[CONF_STOPS] = [s for s in stops if s[CONF_STOPID] != stop_to_remove]
+            stop_id = user_input["stop_to_remove"]
+            options[CONF_STOPS] = [s for s in stops if s[CONF_STOPID] != stop_id]
             return self.async_create_entry(title="", data=options)
 
         stop_options = {
