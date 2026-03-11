@@ -65,11 +65,8 @@ class BKKStopConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class BKKOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle options for BKK Stop."""
 
-    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        """Initialize options flow."""
-        # Note: In 2024.x, config_entry is often available as self.config_entry
-        # but passing it via __init__ is still standard for some patterns.
-        self.config_entry = config_entry
+    # In modern HA, self.config_entry is automatically available.
+    # We do NOT use __init__ to avoid potential 500 errors if signature mismatches.
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
