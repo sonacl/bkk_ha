@@ -1,6 +1,12 @@
+from __future__ import annotations
+
+import logging
+from typing import Any
 import voluptuous as vol
+
 from homeassistant import config_entries
 from homeassistant.core import callback
+from homeassistant.data_entry_flow import FlowResult
 import homeassistant.helpers.config_validation as cv
 
 from .const import (
@@ -19,13 +25,17 @@ from .const import (
     CONF_STOPS,
 )
 
+_LOGGER = logging.getLogger(__name__)
+
 
 class BKKStopConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for BKK Stop."""
 
     VERSION = 1
 
-    async def async_step_user(self, user_input=None):
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Initial setup: API Key."""
         if user_input is not None:
             return self.async_create_entry(
@@ -45,28 +55,39 @@ class BKKStopConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     @staticmethod
     @callback
-    def async_get_options_flow(config_entry):
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> BKKOptionsFlowHandler:
+        """Get the options flow for this handler."""
         return BKKOptionsFlowHandler(config_entry)
 
 
 class BKKOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle options for BKK Stop."""
 
-    async def async_step_init(self, user_input=None):
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Initialize options flow."""
+        # Note: In 2024.x, config_entry is often available as self.config_entry
+        # but passing it via __init__ is still standard for some patterns.
+        self.config_entry = config_entry
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Menu for adding or managing stops."""
         return self.async_show_menu(
             step_id="init", menu_options=["add_stop", "manage_stops"]
         )
 
-    async def async_step_add_stop(self, user_input=None):
+    async def async_step_add_stop(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Step to add a new stop."""
         if user_input is not None:
-            # Add new stop to the list
             options = dict(self.config_entry.options)
             if CONF_STOPS not in options:
                 options[CONF_STOPS] = []
 
-            # Create a copy of the list to ensure Home Assistant detects the change
             new_stops = list(options[CONF_STOPS])
             new_stops.append(user_input)
             options[CONF_STOPS] = new_stops
@@ -91,7 +112,9 @@ class BKKOptionsFlowHandler(config_entries.OptionsFlow):
             ),
         )
 
-    async def async_step_manage_stops(self, user_input=None):
+    async def async_step_manage_stops(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Select a stop to remove."""
         options = dict(self.config_entry.options)
         stops = options.get(CONF_STOPS, [])
@@ -99,7 +122,6 @@ class BKKOptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_show_menu(step_id="no_stops", menu_options=["add_stop"])
 
         if user_input is not None:
-            # Remove selected stop
             stop_to_remove = user_input["stop_to_remove"]
             options[CONF_STOPS] = [s for s in stops if s[CONF_STOPID] != stop_to_remove]
             return self.async_create_entry(title="", data=options)

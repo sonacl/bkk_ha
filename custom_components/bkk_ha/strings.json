@@ -1,0 +1,45 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Budapest GO (BKK)",
+                "description": "Enter your BKK API Key to start.",
+                "data": {
+                    "api_key": "BKK API Key"
+                }
+            }
+        },
+        "abort": {
+            "already_configured": "This API key is already configured."
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Manage BKK Stops",
+                "description": "What would you like to do?"
+            },
+            "add_stop": {
+                "title": "Add Stop",
+                "data": {
+                    "stop_id": "BKK Stop ID (e.g., BKK_F02283)",
+                    "name": "Custom Name (Optional)",
+                    "max_items": "Max items to display",
+                    "mins_after": "Minutes after now",
+                    "mins_before": "Minutes before now",
+                    "ignore_now": "Ignore immediate departures",
+                    "in_predicted": "Use real-time predictions",
+                    "wheelchair": "Show wheelchair access",
+                    "bikes": "Show bike access",
+                    "colors": "Use route colors"
+                }
+            },
+            "manage_stops": {
+                "title": "Remove Stop",
+                "data": {
+                    "stop_to_remove": "Select stop to remove"
+                }
+            }
+        }
+    }
+}

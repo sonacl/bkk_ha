@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import logging
+import zoneinfo
+from datetime import datetime
+
 from homeassistant.components.sensor import (
     SensorEntity,
     ENTITY_ID_FORMAT,
@@ -9,10 +13,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity import async_generate_entity_id
-
-from datetime import datetime
-import zoneinfo
-import logging
 
 from .const import (
     DOMAIN,
@@ -38,7 +38,8 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the BKK sensors from a config entry."""
-    coordinators = hass.data[DOMAIN][entry.entry_id]
+    # Use runtime_data instead of hass.data
+    coordinators: dict[str, BKKDataUpdateCoordinator] = entry.runtime_data
     stops = entry.options.get(CONF_STOPS, [])
 
     entities = []
@@ -53,6 +54,9 @@ async def async_setup_entry(
 class BKKStopSensor(CoordinatorEntity[BKKDataUpdateCoordinator], SensorEntity):
     """Sensor that displays BKK departures for a specific stop."""
 
+    _attr_has_entity_name = True
+    _attr_attribution = CONF_ATTRIBUTION
+
     def __init__(
         self,
         coordinator: BKKDataUpdateCoordinator,
@@ -64,13 +68,12 @@ class BKKStopSensor(CoordinatorEntity[BKKDataUpdateCoordinator], SensorEntity):
         self._stop_config = stop_config
         self._entry = entry
         self._stopid = stop_config[CONF_STOPID]
-        self._attr_unique_id = f"bkk_stop_{self._stopid}"
+        self._attr_unique_id = f"bkk_ha_{self._stopid}"
         self._attr_name = stop_config.get(CONF_NAME) or f"BKK Stop {self._stopid}"
-        self._attr_attribution = CONF_ATTRIBUTION
         self._tz = zoneinfo.ZoneInfo(self.hass.config.time_zone)
 
         self.entity_id = async_generate_entity_id(
-            ENTITY_ID_FORMAT, f"bkk_stop_{self._stopid}", hass=coordinator.hass
+            ENTITY_ID_FORMAT, f"bkk_ha_{self._stopid}", hass=coordinator.hass
         )
 
     @property
@@ -99,7 +102,6 @@ class BKKStopSensor(CoordinatorEntity[BKKDataUpdateCoordinator], SensorEntity):
             stoptimes = data.get("data", {}).get("entry", {}).get("stopTimes", [])
 
             for stop in stoptimes:
-                # Use predicted time if requested and available
                 target_time = (
                     stop.get("predictedDepartureTime")
                     if (
@@ -115,7 +117,6 @@ class BKKStopSensor(CoordinatorEntity[BKKDataUpdateCoordinator], SensorEntity):
                 if self._stop_config.get(CONF_IGNORE_NOW) and diff == 0:
                     continue
 
-                # Reference Route/Trip
                 trip_id = stop.get("tripId")
                 route_id = data["data"]["references"]["trips"][trip_id]["routeId"]
                 route = data["data"]["references"]["routes"][route_id]

@@ -1,18 +1,22 @@
+from __future__ import annotations
+
 import logging
 import async_timeout
 from datetime import timedelta
+
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import DOMAIN, CONF_APIKEY, CONF_STOPID, DEFAULT_SCAN_INTERVAL
+from .const import DOMAIN, CONF_STOPID, DEFAULT_SCAN_INTERVAL
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class BKKDataUpdateCoordinator(DataUpdateCoordinator):
+class BKKDataUpdateCoordinator(DataUpdateCoordinator[dict]):
     """Class to manage fetching BKK data for a specific stop."""
 
-    def __init__(self, hass, api_key, stop_config):
+    def __init__(self, hass: HomeAssistant, api_key: str, stop_config: dict) -> None:
         """Initialize the coordinator."""
         super().__init__(
             hass,
@@ -24,7 +28,7 @@ class BKKDataUpdateCoordinator(DataUpdateCoordinator):
         self.stop_config = stop_config
         self.session = async_get_clientsession(hass)
 
-    async def _async_update_data(self):
+    async def _async_update_data(self) -> dict:
         """Fetch data from BKK API."""
         stopid = self.stop_config[CONF_STOPID]
         minsafter = str(self.stop_config.get("mins_after", 60))
@@ -46,4 +50,4 @@ class BKKDataUpdateCoordinator(DataUpdateCoordinator):
 
                 return data
         except Exception as err:
-            raise UpdateFailed(f"Error communicating with BKK API: {err}")
+            raise UpdateFailed(f"Error communicating with BKK API: {err}") from err
