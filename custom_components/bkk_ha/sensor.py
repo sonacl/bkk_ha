@@ -70,11 +70,16 @@ class BKKStopSensor(CoordinatorEntity[BKKDataUpdateCoordinator], SensorEntity):
         self._stopid = stop_config[CONF_STOPID]
         self._attr_unique_id = f"bkk_ha_{self._stopid}"
         self._attr_name = stop_config.get(CONF_NAME) or f"BKK Stop {self._stopid}"
-        self._tz = zoneinfo.ZoneInfo(self.hass.config.time_zone)
+        # self.hass is not available in __init__, so timezone is fetched lazily via property
 
         self.entity_id = async_generate_entity_id(
             ENTITY_ID_FORMAT, f"bkk_ha_{self._stopid}", hass=coordinator.hass
         )
+
+    @property
+    def _tz(self) -> zoneinfo.ZoneInfo:
+        """Return timezone lazily — self.hass is only available after __init__."""
+        return zoneinfo.ZoneInfo(self.hass.config.time_zone)
 
     @property
     def native_value(self) -> str:
