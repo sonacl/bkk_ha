@@ -20,5 +20,5 @@ Modern Home Assistant custom integration for Budapest public transport (BKK).
 
 ## Lovelace Card
 Add the following as a Resource in Home Assistant:
-- **URL:** `/bkk_stop/bkk-stop-card.js`
+- **URL:** `/bkk_ha/bkk-stop-card.js`
 - **Type:** `JavaScript Module`

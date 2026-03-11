@@ -1,4 +1,4 @@
-DOMAIN = "bkk_stop"
+DOMAIN = "bkk_ha"
 CONF_APIKEY = "api_key"
 CONF_STOPS = "stops"
 CONF_STOPID = "stop_id"

@@ -10,7 +10,7 @@ from .coordinator import BKKDataUpdateCoordinator
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS = [Platform.SENSOR]
-URL_BASE = "/bkk_stop"
+URL_BASE = "/bkk_ha"
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

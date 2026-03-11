@@ -1,5 +1,5 @@
 {
-  "domain": "bkk_stop",
+  "domain": "bkk_ha",
   "name": "Budapest GO (BKK)",
   "documentation": "https://github.com/kaffkatibor/bkk_stop",
   "requirements": [],
